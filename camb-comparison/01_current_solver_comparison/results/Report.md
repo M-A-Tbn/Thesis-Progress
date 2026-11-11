@@ -107,37 +107,15 @@ and CLASS provides an independent comparison, not an exact answer to be treated 
 
 ### How the differences were measured
 
-For every pair A/B, the plotted residual is **100 × (P_A/P_B − 1)**.
-For example, emulator/CLASS uses CLASS in the denominator. Positive values
-mean that the first prediction is higher; negative values mean it is lower.
+For each pair of predictions A and B, the percentage difference was calculated as $100(P_A/P_B - 1)$. The second prediction is the reference. For example, a positive emulator/CLASS difference means the emulator predicts more power than CLASS at that scale.
 
-Each spectrum was compared on the existing CLASS k nodes, without an extra
-CLASS interpolation. The emulator's own CBL interface interpolates its 400
-native predictions using a cubic spline in linear k and linear P. The saved
-CAMB2 predictions had already been interpolated to those same points by CAMB2.
+The original CLASS sampling points were used as the comparison grid. CAMB2 had already been evaluated at these points using its own interpolation routine. CBL used a cubic spline in linear $k$ and linear $P$ to evaluate the emulator at the same points.
 
-The native emulator range starts at k=1.5e-4 Mpc^-1. The first two points of
-the previous grid fall below it and were omitted from this new comparison,
-not extrapolated. This leaves 99 common points per case; the sampled upper
-endpoint is below 1 Mpc^-1. The focus range retains all its earlier points:
-63 for flat and evolving dark energy, and 62 for curved LambdaCDM.
+The emulator’s native range starts at $k = 1.5 \times 10^{-4}\,\mathrm{Mpc}^{-1}$. The two lowest CLASS points fall below this limit and were omitted, leaving 99 common points per case. The highest sampled point is below $1\,\mathrm{Mpc}^{-1}$. The focus range, $0.02 < k < 0.3\,\mathrm{Mpc}^{-1}$, contains 63 points for flat ΛCDM and evolving dark energy, and 62 for curved ΛCDM.
 
-The statistics give equal weight to each retained k node. They are not
-weighted by measurement uncertainties, bin widths or survey information.
-The maximum is the largest value **on the sampled nodes**, not a proven
-maximum between them. RMS is the square root of the mean squared residual;
-the signed mean shows its average offset; the 95th percentile describes the
-absolute residual below which 95% of the sampled values fall. A small signed
-mean can hide positive and negative differences that cancel.
+Each sampled point was given equal weight. The **maximum** is the largest absolute difference among those points. The **RMS** summarizes the size of the differences by squaring them, averaging them and taking the square root. The **signed mean** shows the average offset, although positive and negative differences can cancel. The **95th percentile** gives the value below which about 95% of the absolute differences fall.
 
-Three ranges are recorded: the complete common grid; the grid after applying
-the low-k cuts used in Emmanuel's inference examples; and the earlier focus
-interval. The thesis cuts are 8e-4 Mpc^-1 for curved LambdaCDM and 3e-3 Mpc^-1
-for evolving dark energy (Chapter 5, Sections 5.2.1 and 5.2.2). For flat LambdaCDM,
-the native lower limit is retained. These are conservative selections from
-those examples, **not universal boundaries guaranteeing accuracy** for every
-cosmology or redshift. Red shading on the power plots marks points below
-the cuts; those points remain in the full-common-grid statistics.
+The appendix gives results for the full common grid, the focus range and the grid after applying the lower limits used in Emmanuel’s inference examples. Those limits are $8 \times 10^{-4}\,\mathrm{Mpc}^{-1}$ for curved ΛCDM and $3 \times 10^{-3}\,\mathrm{Mpc}^{-1}$ for evolving dark energy. The flat case keeps the full common grid. The red shading marks scales below these limits, which remain included in the full-grid statistics. The limits describe the scales selected in those inference examples.
 
 ### Power spectra and percentage differences
 
@@ -151,29 +129,16 @@ overall spectrum, then use its difference plot to see what the overlap hides.
 | Evolving dark energy | [Power spectra](figures/07_three_way_power_evolving_de.png) | [Percentage differences](figures/10_three_way_residuals_evolving_de.png) |
 
 ### Checks, inference decision and next question
-The compiled network suite passed all 10 test cases and 9,960 assertions.
-The supplied growth suite passed 14 cases (543 assertions), and the
-rescaling/normalization suite passed 15 cases (220 assertions). A separate
-Python evaluation reproduced the compiled network to 8.9e-16 in log10(P)
-and its interpolated spectrum to 1.2e-15 in relative power. All 243
-pair-by-range statistical summaries were independently recomputed.
-All 27 emulator predictions were repeated three times and returned identical
-values. At the native grid points, the complete CBL path agrees with an
-explicit reconstruction of its rescaling and unit conversion. At matching
-flat z=0 reference settings, that reconstruction returns the raw network
-spectrum. These checks help exclude basic interface and normalization errors.
-Physical accuracy would require a separate check.
 
-The fixed-spectrum differences were calculated directly. A Markov chain
-Monte Carlo (MCMC) study of effects on inferred parameters would require a
-separate setup with observations or mock data, their uncertainties and
-covariance, a likelihood, free parameters, priors and convergence checks.
+The network passed 10 test cases covering 9,960 checks. The growth calculation passed 14 cases covering 543 checks, and the rescaling and normalization passed 15 cases covering 220 checks.
 
-The numerical comparison is complete, but the origin of the larger emulator
-residual is unresolved. The next scientific question is to separate the
-reference-spectrum mismatch from the growth mapping, starting with the flat
-z=0 case and the original training provenance. CAMB2 retraining, timing claims
-and massive neutrinos remain outside this experiment.
+An independent Python calculation agreed with the compiled network within $8.9 \times 10^{-16}$ in $\log_{10}P$ and with the interpolated spectrum within $1.2 \times 10^{-15}$ in relative power. All 243 statistical summaries were independently recalculated. Each of the 27 emulator predictions was run three times and gave identical values.
+
+At the emulator’s original sampling points, the full CBL calculation agreed with an independent reconstruction of the rescaling and unit conversion. For flat ΛCDM at $z=0$, using the reference settings, that reconstruction recovered the spectrum predicted directly by the network. These checks establish consistency between the calculations. Assessing physical accuracy requires a separate comparison.
+
+The percentage differences between the fixed spectra were calculated directly. A Markov chain Monte Carlo (MCMC) analysis would address whether those differences affect inferred cosmological parameters. It would require a separate setup with observations or mock data, their uncertainties and covariance, a likelihood, free parameters, priors and convergence checks.
+
+The next question is **how much of the discrepancy is already present in the flat ΛCDM reference spectrum at $z=0$**. Recovering the original training settings would allow a solver comparison at that reference point and help distinguish the starting discrepancy from changes introduced by the growth rescaling.
 
 ## AI assistance and human review
 
