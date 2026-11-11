@@ -3,7 +3,7 @@
 ## Latest comparison — 7 November 2026
 
 The earlier solver comparison has now been extended to CosmoBolognaLib's existing
-emulator. CAMB2, CLASS and Emmanuel’s existing emulator were compared at the
+emulator. CAMB2, CLASS and CBL emulator were compared at the
 same cosmologies and redshifts using the supplied network weights.
 
 All **three cosmologies at nine redshifts** have been evaluated: flat
@@ -53,15 +53,9 @@ that the emulator works better in curved cosmologies.
 The network predicts a reference spectrum at z=0 from two density inputs.
 The surrounding CBL code then changes its amplitude and shape using the
 primordial parameters, the growth-factor ratio and the curvature correction.
-This two-part construction is described in Emmanuel's Section 4.2, especially
+This two-part construction is described in Emmanuel's thesis Section 4.2,
 Equation (4.3), and illustrated in Figure 4.3. The comparison uses predictions
 from **the complete implementation**.
-
-The unchanged DIFA CBL checkout is pinned to commit
-`ca04c5e15a71b62207bad8f3c00c2cd22745b569`. The trained bundle is `Pk_def`;
-its files are identical on the checked master and original `CAMB_emulator`
-branch. This identifies the shipped implementation, but does not establish
-that this is exactly the checkpoint used for every thesis result.
 
 The input densities are Omega_b=0.04936781 and Omega_CDM=0.26447041 at the
 reference h=0.6736. These follow from the same physical densities used in
@@ -82,29 +76,34 @@ omega_CDM = 0.120, As = 2.1e-9 and ns = 0.9649, with a pivot of
 | Curved LambdaCDM | 0.01 | -1 | 0 |
 | Evolving dark energy | 0 | -0.99 | -0.02 |
 
-The target radiation background used in the emulator's growth calculation
-was set to the audited CLASS photon-plus-massless-neutrino density,
-Omega_r = 9.218085625177e-5. The dark-energy density was set by the
-expansion equation. The saved solver spectra use the same synchronous-gauge
-baryon and cold-dark-matter density definition. The gauge is the coordinate
-convention used to describe the fluctuations. All three predictions use
-physical units of Mpc^-1 for k and Mpc³ for P. The spectra use the supplied primordial amplitude As
-without sigma8 renormalization, which would rescale the fluctuation amplitude.
 
-There is an important limitation to this matching. The trained bundle lists
-Neff=3.04 and Omega_r=9.26535e-5, whereas the solver comparison uses Neff=3.044
-and the radiation density calculated from TCMB. The network has no radiation
-input, so setting the target growth background does not retrain its reference
-spectrum or remove this difference in assumptions. The exact training CAMB
-version, precision settings and complete training records have not been
-established. The CAMB version bundled in the checkout is not proof of the
-version used to create the training data.
+The emulator uses radiation in two places. First, radiation affects the shape
+of the reference power spectrum that the network learned. Second, it affects
+the expansion of the universe and therefore how matter fluctuations grow. Only
+the second part—the growth calculation—can be given a new radiation density
+without changing the trained network.
 
-For that reason, the measured residuals combine possible training-target,
-solver-version, network, interpolation and growth-mapping differences.
-The comparison therefore leaves the individual contribution of each source
-undetermined. The thesis validation used its own settings. CLASS serves as
-an independent comparison.
+For the growth calculation, the same present-day radiation density as in CLASS
+was used: \(\Omega_r = 9.218085625177\times10^{-5}\). This includes photons and
+massless neutrinos. The dark-energy density was then set by the expansion equation:
+once matter, radiation and curvature were specified, the equation fixed how much
+dark energy was needed to match the chosen expansion rate today. All three
+predictions were compared in the same units: Mpc⁻¹ for \(k\) and Mpc³ for \(P(k)\).
+
+The trained network’s documentation lists slightly different radiation settings:
+\(N_{\rm eff}=3.04\) and \(\Omega_r=9.26535\times10^{-5}\). The solver runs used
+\(N_{\rm eff}=3.044\) and calculated the radiation density from that value and the
+cosmic microwave background temperature. Since the network takes only baryon and
+cold-dark-matter densities as inputs, matching the radiation density in the growth
+calculation does not change the starting spectrum it predicts. The exact CAMB version
+and precision settings used to generate the training data are also unknown. I am not
+sure if the CAMB version included with the code is the one used for training.
+
+The measured differences therefore show how closely the **complete emulator** agrees
+with CAMB2 and CLASS in this setup. They do not show how much of the difference comes
+from the original training spectra, the network’s approximation, interpolation, or
+the growth calculation. Emmanuel’s thesis tested the emulator under its own settings,
+and CLASS provides an independent comparison, not an exact answer to be treated as the ground truth.
 
 ### How the differences were measured
 
@@ -114,8 +113,8 @@ mean that the first prediction is higher; negative values mean it is lower.
 
 Each spectrum was compared on the existing CLASS k nodes, without an extra
 CLASS interpolation. The emulator's own CBL interface interpolates its 400
-native predictions using a cubic spline in linear k and linear P. The saved CAMB2 predictions had already been interpolated to those same
-points by CAMB2.
+native predictions using a cubic spline in linear k and linear P. The saved
+CAMB2 predictions had already been interpolated to those same points by CAMB2.
 
 The native emulator range starts at k=1.5e-4 Mpc^-1. The first two points of
 the previous grid fall below it and were omitted from this new comparison,
@@ -152,7 +151,6 @@ overall spectrum, then use its difference plot to see what the overlap hides.
 | Evolving dark energy | [Power spectra](figures/07_three_way_power_evolving_de.png) | [Percentage differences](figures/10_three_way_residuals_evolving_de.png) |
 
 ### Checks, inference decision and next question
-
 The compiled network suite passed all 10 test cases and 9,960 assertions.
 The supplied growth suite passed 14 cases (543 assertions), and the
 rescaling/normalization suite passed 15 cases (220 assertions). A separate
@@ -163,7 +161,8 @@ All 27 emulator predictions were repeated three times and returned identical
 values. At the native grid points, the complete CBL path agrees with an
 explicit reconstruction of its rescaling and unit conversion. At matching
 flat z=0 reference settings, that reconstruction returns the raw network
-spectrum. These checks help exclude basic interface and normalization errors. Physical accuracy would require a separate check.
+spectrum. These checks help exclude basic interface and normalization errors.
+Physical accuracy would require a separate check.
 
 The fixed-spectrum differences were calculated directly. A Markov chain
 Monte Carlo (MCMC) study of effects on inferred parameters would require a
@@ -176,7 +175,6 @@ reference-spectrum mismatch from the growth mapping, starting with the flat
 z=0 case and the original training provenance. CAMB2 retraining, timing claims
 and massive neutrinos remain outside this experiment.
 
-The [weekly update](../../../meetings/2026-11-11.md) summarizes the findings
-for discussion with Professor Marulli.
+The [weekly update](../../../meetings/2026-11-11.md) summarizes the findings.
 
 For the original solver settings and results, see the [earlier solver report](https://github.com/M-A-Tbn/Thesis-Progress/blob/56e515fee4b34f244a41875708cf9e891690bfef/camb-comparison/01_current_solver_comparison/results/Report.md).
