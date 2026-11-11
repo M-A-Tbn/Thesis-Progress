@@ -60,8 +60,7 @@ overall size of the sampled differences. This shows closer agreement with
 CLASS under the tested settings, rather than establishing absolute accuracy.
 
 - [Earlier weekly update — 29 October](meetings/2026-10-29.md): the solver-stage findings and remaining work at that date.
-- [Comparison report](camb-comparison/01_current_solver_comparison/results/Report.md): setup, results and limitations.
-- [Latest comparison plot](camb-comparison/01_current_solver_comparison/results/figures/11_three_way_agreement_by_redshift.png): the three prediction pairs across nine redshifts.
+- [Earlier solver report](https://github.com/M-A-Tbn/Thesis-Progress/blob/56e515fee4b34f244a41875708cf9e891690bfef/camb-comparison/01_current_solver_comparison/results/Report.md) with the setup, results and limitations.
 - [Input notes](camb-comparison/02_shared_inputs_and_z0_reference/Source%20audit.md): documented thesis settings and choices made for this comparison.
 
 The DIFA library, network and growth/rescaling checks now pass. Original
