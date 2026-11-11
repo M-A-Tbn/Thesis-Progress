@@ -8,12 +8,12 @@ updates are collected here for discussion with Professor Marulli.
 
 ## Aim of the thesis
 
-The aim is to reproduce Emmanuel's emulator of the linear matter power spectrum
-and build a version based on CAMB2. An emulator provides a fast approximation
-to a solver's predictions, so its accuracy needs to be checked against the
-solver on cases that were not used for training.
+The aim is to reproduce Emmanuel's emulator (the current emulator living in CBL)
+of the linear matter power spectrum and build a version based on CAMB2. An emulator
+provides a fast approximation to a solver's predictions, so its accuracy needs to be
+checked against the solver on cases that were not used for training.
 
-The CAMB2 emulator will also be compared with Emmanuel's emulator over their
+The CAMB2 emulator will also be compared with current CBL's emulator over their
 shared parameter range. Once that baseline works, and if time allows, a
 massive-neutrino extension will be investigated following Pezzotta et al.
 
@@ -27,12 +27,12 @@ the predictions that will later be used for the emulator work.
 | 1. Solver study and comparison | Study CAMB2 and compare its predictions with CAMB, using CLASS as an independent reference. | Three models have been compared at nine redshifts. Numerical convergence remains to be checked. |
 | 2. Reproduce Emmanuel's emulator | Obtain the implementation and trained weights, then reproduce the main results and plots. | The unchanged DIFA emulator has been checked and compared locally with CAMB2 and CLASS in all 27 cases. A persistent spectrum mismatch and incomplete training provenance remain; exact thesis reproduction is not claimed. |
 | 3. Train and validate a CAMB2 emulator | Generate the training data, train the emulator and test it against CAMB2 on an independent test set. | Not started. |
-| 4. Compare the emulators | Compare the CAMB2 and Emmanuel emulators over their shared parameter range. | Planned after reproduction and training. |
+| 4. Compare the emulators | Compare the CAMB2 and CBL emulators over their shared parameter range. | Planned after reproduction and training. |
 | 5. Investigate massive neutrinos | Study an extension following Pezzotta et al. and agree on a suitable test and validation range. | Conditional on completing the baseline and having enough time. |
 
 ## Current step: compare the existing emulator with the solvers
 
-The completed solver study has now been extended to Emmanuel's shipped
+The completed solver study has now been extended to CBL's shipped
 emulator for the same three cosmologies and nine redshifts. The largest
 sampled emulator/CAMB2 differences in 0.02 < k < 0.3 Mpc^-1 are **0.68817%**
 for flat LambdaCDM, **0.42375%** for curved LambdaCDM and **0.68329%** for
