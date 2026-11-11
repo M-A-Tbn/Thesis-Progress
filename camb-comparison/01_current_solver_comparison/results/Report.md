@@ -84,15 +84,15 @@ the second part—the growth calculation—can be given a new radiation density
 without changing the trained network.
 
 For the growth calculation, the same present-day radiation density as in CLASS
-was used: \(\Omega_r = 9.218085625177\times10^{-5}\). This includes photons and
+was used: $\Omega_r = 9.218085625177\times10^{-5}$. This includes photons and
 massless neutrinos. The dark-energy density was then set by the expansion equation:
 once matter, radiation and curvature were specified, the equation fixed how much
 dark energy was needed to match the chosen expansion rate today. All three
-predictions were compared in the same units: Mpc⁻¹ for \(k\) and Mpc³ for \(P(k)\).
+predictions were compared in the same units: Mpc⁻¹ for $k$ and Mpc³ for $P(k)$.
 
 The trained network’s documentation lists slightly different radiation settings:
-\(N_{\rm eff}=3.04\) and \(\Omega_r=9.26535\times10^{-5}\). The solver runs used
-\(N_{\rm eff}=3.044\) and calculated the radiation density from that value and the
+$N_{\rm eff}=3.04$ and $\Omega_r=9.26535\times10^{-5}$. The solver runs used
+$N_{\rm eff}=3.044$ and calculated the radiation density from that value and the
 cosmic microwave background temperature. Since the network takes only baryon and
 cold-dark-matter densities as inputs, matching the radiation density in the growth
 calculation does not change the starting spectrum it predicts. The exact CAMB version
