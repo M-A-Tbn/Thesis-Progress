@@ -1,4 +1,173 @@
-# Comparing CAMB and CAMB2 with CLASS from z=0 to z=2
+# Linear matter power: solvers and the current CBL emulator
+
+## Latest comparison — 7 November 2026
+
+The earlier solver comparison has now been extended to CosmoBolognaLib's existing
+emulator. CAMB2, CLASS and Emmanuel’s existing emulator were compared at the
+same cosmologies and redshifts using the supplied network weights.
+
+All **three cosmologies at nine redshifts** have been evaluated: flat
+LambdaCDM, curved LambdaCDM and evolving dark energy, at z=0, 0.25, 0.5,
+0.75, 1, 1.25, 1.5, 1.75 and 2. Each case now has a CAMB 2.0.4 spectrum,
+a CLASS 3.1.0 spectrum and an emulator spectrum. The earlier comparison below includes CAMB 1.6.6.
+
+### Main result
+
+The curves lie almost on top of each other in the power-spectrum plots.
+However, the percentage-difference plots reveal a clear distinction:
+**CAMB2 and CLASS agree more closely with each other than either agrees
+with the emulator**, as measured by maximum and RMS differences
+in every tested case in the focus range, 0.02 < k < 0.3 Mpc^-1.
+
+The table gives the largest sampled absolute percentage difference found
+across the nine redshifts, separately for each pair and cosmology. The
+three entries in a row do not necessarily occur at the same k or redshift.
+
+| Cosmology | CAMB2 / CLASS | Emulator / CLASS | Emulator / CAMB2 |
+|---|---:|---:|---:|
+| Flat LambdaCDM | 0.06920% | 0.62622% | 0.68817% |
+| Curved LambdaCDM | 0.06589% | 0.48513% | 0.42375% |
+| Evolving dark energy | 0.06832% | 0.62089% | 0.68329% |
+
+The 0.68817% value is the largest absolute emulator/CAMB2 difference at a
+sampled point in the flat model. The root mean square (RMS) summarizes the
+size of the differences over all sampled points at a given redshift. Across
+the nine redshifts, the emulator/CAMB2 RMS is approximately 0.1795% for flat
+LambdaCDM, 0.1576% for curved LambdaCDM and 0.1792% for evolving dark energy.
+
+The [data appendix](Data%20appendix.md) gives the numbers for each pair and
+redshift across all three sampling ranges.
+
+![Three-way agreement across redshift](figures/11_three_way_agreement_by_redshift.png)
+
+The emulator/CAMB2 differences change very little with redshift in these
+tests. **Interpretation:** this is consistent with a persistent shape
+difference being carried through the growth rescaling, rather than a
+difference that becomes much larger with redshift. It does not identify
+the physical or numerical cause of this behaviour. The curved case also uses
+a different sampling grid, so its smaller maximum cannot by itself establish
+that the emulator works better in curved cosmologies.
+
+### What the emulator calculation includes
+
+The network predicts a reference spectrum at z=0 from two density inputs.
+The surrounding CBL code then changes its amplitude and shape using the
+primordial parameters, the growth-factor ratio and the curvature correction.
+This two-part construction is described in Emmanuel's Section 4.2, especially
+Equation (4.3), and illustrated in Figure 4.3. The comparison uses predictions
+from **the complete implementation**.
+
+The unchanged DIFA CBL checkout is pinned to commit
+`ca04c5e15a71b62207bad8f3c00c2cd22745b569`. The trained bundle is `Pk_def`;
+its files are identical on the checked master and original `CAMB_emulator`
+branch. This identifies the shipped implementation, but does not establish
+that this is exactly the checkpoint used for every thesis result.
+
+The input densities are Omega_b=0.04936781 and Omega_CDM=0.26447041 at the
+reference h=0.6736. These follow from the same physical densities used in
+the solver comparison: omega_b=0.0224 and omega_CDM=0.120, with omega=Omega h².
+They lie inside both the thesis and shipped density ranges. The wider ranges
+listed in the shipped metadata were not treated as a newly validated domain.
+
+The saved CAMB2 and CLASS spectra were reused unchanged. The emulator uses
+the same target H0, matter densities, As, ns, pivot, curvature and dark-energy
+parameters listed in the earlier setup below. Its target radiation background
+was set to the audited CLASS photon-plus-massless-neutrino density,
+Omega_r=9.218085625177e-5. The dark-energy density closes the expansion equation.
+All outputs use physical k in Mpc^-1 and P in Mpc³, with zero massive neutrinos
+and linear power. The supplied As normalization was retained; no sigma8
+renormalization was applied.
+
+There is an important limitation to this matching. The trained bundle lists
+Neff=3.04 and Omega_r=9.26535e-5, whereas the solver comparison uses Neff=3.044
+and the radiation density calculated from TCMB. The network has no radiation
+input, so setting the target growth background does not retrain its reference
+spectrum or remove this difference in assumptions. The exact training CAMB
+version, precision settings and complete training records have not been
+established. The CAMB version bundled in the checkout is not proof of the
+version used to create the training data.
+
+For that reason, the measured residuals combine possible training-target,
+solver-version, network, interpolation and growth-mapping differences.
+The comparison therefore leaves the individual contribution of each source
+undetermined. The thesis validation used its own settings. CLASS serves as
+an independent comparison.
+
+### How the differences were measured
+
+For every pair A/B, the plotted residual is **100 × (P_A/P_B − 1)**.
+For example, emulator/CLASS uses CLASS in the denominator. Positive values
+mean that the first prediction is higher; negative values mean it is lower.
+
+Each spectrum was compared on the existing CLASS k nodes, without an extra
+CLASS interpolation. The emulator's own CBL interface interpolates its 400
+native predictions using a cubic spline in linear k and linear P. That step
+is part of the unchanged emulator implementation. The earlier CAMB2
+interpolation is also retained, as described below.
+
+The native emulator range starts at k=1.5e-4 Mpc^-1. The first two points of
+the previous grid fall below it and were omitted from this new comparison,
+not extrapolated. This leaves 99 common points per case; the sampled upper
+endpoint is below 1 Mpc^-1. The focus range retains all its earlier points:
+63 for flat and evolving dark energy, and 62 for curved LambdaCDM.
+
+The statistics give equal weight to each retained k node. They are not
+weighted by measurement uncertainties, bin widths or survey information.
+The maximum is the largest value **on the sampled nodes**, not a proven
+maximum between them. RMS is the square root of the mean squared residual;
+the signed mean shows its average offset; the 95th percentile describes the
+absolute residual below which 95% of the sampled values fall. A small signed
+mean can hide positive and negative differences that cancel.
+
+Three ranges are recorded: the complete common grid; the grid after applying
+the low-k cuts used in Emmanuel's inference examples; and the earlier focus
+interval. The thesis cuts are 8e-4 Mpc^-1 for curved LambdaCDM and 3e-3 Mpc^-1
+for evolving dark energy (Chapter 5, Sections 5.2.1 and 5.2.2). For flat LambdaCDM,
+the native lower limit is retained. These are conservative selections from
+those examples, **not universal boundaries guaranteeing accuracy** for every
+cosmology or redshift. Red shading on the power plots marks points below
+the cuts; those points remain in the full-common-grid statistics.
+
+### Power spectra and percentage differences
+
+Each figure has one panel per redshift. Start with the power plot to see the
+overall spectrum, then use its difference plot to see what the overlap hides.
+
+| Cosmology | P(k) overlays | All three pairwise differences in the focus range |
+|---|---|---|
+| Flat LambdaCDM | [Power spectra](figures/05_three_way_power_flat.png) | [Percentage differences](figures/08_three_way_residuals_flat.png) |
+| Curved LambdaCDM | [Power spectra](figures/06_three_way_power_curved.png) | [Percentage differences](figures/09_three_way_residuals_curved.png) |
+| Evolving dark energy | [Power spectra](figures/07_three_way_power_evolving_de.png) | [Percentage differences](figures/10_three_way_residuals_evolving_de.png) |
+
+### Checks, inference decision and next question
+
+The compiled network suite passed all 10 test cases and 9,960 assertions.
+The supplied growth suite passed 14 cases (543 assertions), and the
+rescaling/normalization suite passed 15 cases (220 assertions). A separate
+Python evaluation reproduced the compiled network to 8.9e-16 in log10(P)
+and its interpolated spectrum to 1.2e-15 in relative power. All 243
+pair-by-range statistical summaries were independently recomputed.
+All 27 emulator predictions were repeated three times and returned identical
+values. At the native grid points, the complete CBL path agrees with an
+explicit reconstruction of its rescaling and unit conversion. At matching
+flat z=0 reference settings, that reconstruction returns the raw network
+spectrum. These checks help exclude basic interface and normalization errors. Physical accuracy would require a separate check.
+
+The fixed-spectrum differences were calculated directly. A Markov chain
+Monte Carlo (MCMC) study of effects on inferred parameters would require a
+separate setup with observations or mock data, their uncertainties and
+covariance, a likelihood, free parameters, priors and convergence checks.
+
+The numerical comparison is complete, but the origin of the larger emulator
+residual is unresolved. The next scientific question is to separate the
+reference-spectrum mismatch from the growth mapping, starting with the flat
+z=0 case and the original training provenance. CAMB2 retraining, timing claims
+and massive neutrinos remain outside this experiment.
+
+The [weekly update](../../../meetings/2026-11-11.md) summarizes the findings
+for discussion with Professor Marulli.
+
+## Earlier solver-only comparison — retained results
 
 Before moving on to the emulator, the agreement between CAMB 1.6.6 and
 CAMB 2.0.4 was examined using the same cosmological inputs. Following Professor
@@ -190,65 +359,8 @@ the evolution of the spectrum, rather than a change in solver error.
 
 ![Evolving-dark-energy power spectra at nine redshifts](figures/04_matter_power_evolving_dark_energy.png)
 
-### Values at each redshift
-
-The tables below give the values behind the main figure. All maxima and RMS
-values refer to 0.02 < k < 0.3 Mpc^-1. The z=0 rows are unchanged from the
-previous comparison.
-
-#### Flat LambdaCDM
-
-| z | Original CLASS focus points | CAMB 1.6.6 maximum | CAMB 2.0.4 maximum | CAMB 1.6.6 RMS | CAMB 2.0.4 RMS |
-|---|---:|---:|---:|---:|---:|
-| 0 | 63 | 0.136461% | 0.065369% | 0.036083% | 0.029118% |
-| 0.25 | 63 | 0.135668% | 0.065362% | 0.036108% | 0.029121% |
-| 0.5 | 63 | 0.135881% | 0.065301% | 0.036263% | 0.029097% |
-| 0.75 | 63 | 0.136555% | 0.065470% | 0.036412% | 0.029053% |
-| 1 | 63 | 0.137009% | 0.065884% | 0.036460% | 0.029038% |
-| 1.25 | 63 | 0.138093% | 0.066986% | 0.036541% | 0.029092% |
-| 1.5 | 63 | 0.138943% | 0.067842% | 0.036602% | 0.029235% |
-| 1.75 | 63 | 0.140043% | 0.068963% | 0.036682% | 0.029369% |
-| 2 | 63 | 0.140297% | 0.069197% | 0.036707% | 0.029448% |
-
-#### Curved LambdaCDM
-
-| z | Original CLASS focus points | CAMB 1.6.6 maximum | CAMB 2.0.4 maximum | CAMB 1.6.6 RMS | CAMB 2.0.4 RMS |
-|---|---:|---:|---:|---:|---:|
-| 0 | 62 | 0.153655% | 0.062971% | 0.038343% | 0.028997% |
-| 0.25 | 62 | 0.153999% | 0.062613% | 0.038398% | 0.028999% |
-| 0.5 | 62 | 0.155157% | 0.062627% | 0.038508% | 0.028921% |
-| 0.75 | 62 | 0.157154% | 0.063181% | 0.038669% | 0.028830% |
-| 1 | 62 | 0.157835% | 0.063805% | 0.038712% | 0.028813% |
-| 1.25 | 62 | 0.158323% | 0.064794% | 0.038790% | 0.028883% |
-| 1.5 | 62 | 0.158834% | 0.065509% | 0.038858% | 0.028947% |
-| 1.75 | 62 | 0.159101% | 0.065716% | 0.038880% | 0.028990% |
-| 2 | 62 | 0.159183% | 0.065888% | 0.038863% | 0.029007% |
-
-#### Evolving dark energy
-
-| z | Original CLASS focus points | CAMB 1.6.6 maximum | CAMB 2.0.4 maximum | CAMB 1.6.6 RMS | CAMB 2.0.4 RMS |
-|---|---:|---:|---:|---:|---:|
-| 0 | 63 | 0.138969% | 0.066643% | 0.036508% | 0.029578% |
-| 0.25 | 63 | 0.138484% | 0.066152% | 0.036439% | 0.029441% |
-| 0.5 | 63 | 0.138027% | 0.065697% | 0.036449% | 0.029376% |
-| 0.75 | 63 | 0.138097% | 0.065775% | 0.036447% | 0.029302% |
-| 1 | 63 | 0.138043% | 0.065706% | 0.036433% | 0.029265% |
-| 1.25 | 63 | 0.138533% | 0.066193% | 0.036406% | 0.029328% |
-| 1.5 | 63 | 0.139336% | 0.067002% | 0.036462% | 0.029356% |
-| 1.75 | 63 | 0.139772% | 0.067420% | 0.036520% | 0.029368% |
-| 2 | 63 | 0.140659% | 0.068325% | 0.036590% | 0.029376% |
-
-### Full sampled k range
-
-Including all sampled points in 1e-4 <= k <= 1 Mpc^-1 gives the following
-maxima. The k values are in Mpc^-1. For curved LambdaCDM, CAMB2's largest
-difference over this wider range occurs at z=0, outside the narrower interval.
-
-| Model | CAMB 1.6.6 maximum | z | k | CAMB 2.0.4 maximum | z | k |
-|---|---:|---:|---:|---:|---:|---:|
-| Flat LambdaCDM | 0.140297% | 2 | 0.0383146 | 0.069197% | 2 | 0.0383146 |
-| Curved LambdaCDM | 0.159183% | 2 | 0.038894 | 0.066727% | 0 | 0.00936425 |
-| Evolving dark energy | 0.140659% | 2 | 0.0383188 | 0.068325% | 2 | 0.0383188 |
+The [data appendix](Data%20appendix.md#earlier-solver-comparison) gives the
+solver differences at each redshift and the maxima over the full sampled range.
 
 ## Checks and remaining limits
 

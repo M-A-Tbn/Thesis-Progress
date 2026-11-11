@@ -9,6 +9,7 @@
 
 /meetings/*
 !/meetings/2026-10-29.md
+!/meetings/2026-11-11.md
 
 /camb-comparison/*
 !/camb-comparison/01_current_solver_comparison/
@@ -20,6 +21,7 @@
 
 /camb-comparison/01_current_solver_comparison/results/*
 !/camb-comparison/01_current_solver_comparison/results/Report.md
+!/camb-comparison/01_current_solver_comparison/results/Data appendix.md
 !/camb-comparison/01_current_solver_comparison/results/figures/
 
 /camb-comparison/01_current_solver_comparison/results/figures/*
