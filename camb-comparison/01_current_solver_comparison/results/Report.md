@@ -175,6 +175,12 @@ reference-spectrum mismatch from the growth mapping, starting with the flat
 z=0 case and the original training provenance. CAMB2 retraining, timing claims
 and massive neutrinos remain outside this experiment.
 
+## AI assistance and human review
+
+AI tools helped draft and edit this report, organize the figures, and prepare
+the data appendix from the saved numerical results. I reviewed and revised
+the report before approving it for publication on GitHub.
+
 The [weekly update](../../../meetings/2026-11-11.md) summarizes the findings.
 
 For the original solver settings and results, see the [earlier solver report](https://github.com/M-A-Tbn/Thesis-Progress/blob/56e515fee4b34f244a41875708cf9e891690bfef/camb-comparison/01_current_solver_comparison/results/Report.md).
