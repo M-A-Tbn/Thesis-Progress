@@ -1,100 +1,109 @@
 # Thesis progress
 
-This repository follows the thesis from the initial solver comparisons through
-to emulator reproduction, training and validation. Reports, plots and weekly
-updates are collected here for discussion with Professor Marulli.
+Weekly reports and plots are kept here for discussion.
 
-**Latest update: 24 November 2026.** [CAMB upgrade benchmark](camb-comparison/06_camb_upgrade_benchmark/Short%20report.md).
+**24 November 2026** · [This week’s short report on the CAMB upgrade](camb-comparison/06_camb_upgrade_benchmark/Short%20report.md)
 
 ## Aim of the thesis
 
-The aim is to reproduce Emmanuel's emulator (the current emulator living in CBL)
-of the linear matter power spectrum and build a version based on CAMB2. An emulator
-provides a fast approximation to a solver's predictions, so its accuracy needs to be
-checked against the solver on cases that were not used for training.
+The thesis aims to reproduce the behaviour of the emulator in CosmoBolognaLib
+(CBL) and to train a new version using spectra calculated with CAMB2. CBL’s
+emulator predicts the linear matter power spectrum, a measure of how strongly
+matter clusters on different scales. Once trained, it can make that prediction
+much faster than a numerical solver can calculate the spectrum directly.
 
-The CAMB2 emulator will also be compared with current CBL's emulator over their
-shared parameter range. Once that baseline works, and if time allows, a
-massive-neutrino extension will be investigated following Pezzotta et al.
+The choice of solver matters because its spectra provide the examples from which
+the new emulator will learn. The first part of the thesis therefore examines
+how closely different solvers agree and how long they take to produce the
+training spectra. Once trained, the new emulator will be tested against CAMB2
+on cosmologies held back from training. A separate comparison with CBL’s emulator
+will then show how their predictions differ over the parameter range both cover.
 
-The CAMB comparison is the first practical step in this path. It helps check
-the predictions that will later be used for the emulator work.
+## Thesis progress
 
-## Project path
+| Stage | Current progress |
+|---|---|
+| Compare the solvers | The October study compared CAMB with the independent solver CLASS. The November benchmark examined how changing the CAMB version affects both the spectra and the calculation time. |
+| Reproduce CBL’s emulator | The existing implementation has been run and its predictions compared with CAMB2 and CLASS in 27 cases. The origin of a difference in the flat reference spectrum is still under investigation. |
+| Train and validate a CAMB2 emulator | Training and independent validation are planned. The solver benchmark provides a timing estimate for generating the training data. |
+| Compare the two emulators | Once validation is complete, the comparison will cover cosmologies within the range of both emulators. |
+| Investigate massive neutrinos | If the baseline comparison is complete and time permits, the thesis will explore an extension following Pezzotta et al. |
 
-| Stage | Work | Current status |
-|---|---|---|
-| 1. Solver study and comparison | Compare the CAMB versions used to calculate spectra for CBL and check their numerical behaviour. | CAMB 1.3.4, 1.6.6 and 2.0.5 were benchmarked on 49 density pairs and three main controls at four redshifts. The reports include the usual-settings comparison, runtime measurements and a recombination check. |
-| 2. Evaluate the current CBL emulator | Check the existing implementation and compare its predictions with reference solvers. | The existing CBL emulator has been evaluated against CAMB2 and CLASS in 27 cases. The reference-spectrum mismatch remains open. |
-| 3. Train and validate a CAMB2 emulator | Generate the training data, train the emulator and test it against CAMB2 on an independent test set. | Not started. |
-| 4. Compare the emulators | Compare the CAMB2 and CBL emulators over their shared parameter range. | Planned after reproduction and training. |
-| 5. Investigate massive neutrinos | Study an extension following Pezzotta et al. and agree on a suitable test and validation range. | Conditional on completing the baseline and having enough time. |
+## 24 November · The CAMB upgrade
 
-## Current step — assess the CAMB upgrade
+Generating training data requires repeated calculations of the matter power
+spectrum. This week’s benchmark addressed two questions. How much time would
+CAMB2 save per calculation, and how much would the spectra used for training
+change? The comparison included CAMB 1.3.4, the version bundled with CBL,
+alongside CAMB 1.6.6 and CAMB 2.0.5. It covered 49 combinations of baryon and
+cold dark matter densities. Three additional models served as controls, one
+with a flat geometry, one with spatial curvature and one with evolving dark
+energy. Each solver call returned spectra at four redshifts (0, 0.5, 1 and 2).
 
-The latest benchmark compares CBL’s bundled CAMB 1.3.4, CAMB 1.6.6 and
-CAMB 2.0.5. It covers 49 pairs of baryon and cold-dark-matter densities,
-plus a flat baseline, a curved model and evolving dark energy. Each run
-returns spectra at redshifts 0, 0.5, 1 and 2.
+At each version’s usual settings (`AccuracyBoost = 1`), **the median speedup
+across the 49 density pairs was about 3.8×** for CAMB 2.0.5 relative to either
+older version. For the flat control, for example, the calculation took
+0.141 seconds with CAMB 2.0.5, compared with 0.537 seconds for CAMB 1.3.4 and
+0.543 seconds for CAMB 1.6.6. These timings cover the solver call itself.
+Measuring the saving in a CBL calculation would require timing the same
+request through the CBL interface.
 
-At the usual settings, including **AccuracyBoost = 1**, the CAMB2 build was
-about **3.8 times faster** on the median density-grid case. The largest
-sampled differences in 0.02 < k < 0.3 Mpc⁻¹ were **1.54% against 1.3.4**
-and **1.56% against 1.6.6**, at the lowest-CDM, highest-baryon grid corner.
-Matching the older recombination calibration left the gap near 1.55%.
-
-These measurements assess the solver upgrade for CBL and the generation
-of new training spectra. The bundled solver provides an upgrade baseline.
-The current emulator can be evaluated against CAMB2 to assess the result
-of future retraining. The working setting remains AccuracyBoost = 1.
+Across most density pairs, the largest change in power stayed below 0.1% for
+$0.02 < k < 0.3\,\mathrm{Mpc}^{-1}$, where $k$ is the wavenumber that identifies
+the scale being compared. The largest differences occurred at the highest
+baryon density and lowest cold dark matter density in the grid. There, the
+difference reached **1.54% relative to CAMB 1.3.4 and 1.56% relative to CAMB
+1.6.6**. Repeating the comparison with the older calibration of the
+recombination model left the gap near 1.55%, so the change in calibration
+alone does not explain it. The project continues to use `AccuracyBoost = 1`.
 
 - [Short report with the main plots](camb-comparison/06_camb_upgrade_benchmark/Short%20report.md)
-- [Detailed scientific report](camb-comparison/06_camb_upgrade_benchmark/Report.md)
-- [Numerical data appendix](camb-comparison/06_camb_upgrade_benchmark/Data%20appendix.md)
-- [Plot appendix covering all 52 presented cosmologies](camb-comparison/06_camb_upgrade_benchmark/Plot%20appendix.md)
-- [Figure index and explanations](camb-comparison/06_camb_upgrade_benchmark/Figure%20index.md)
+- [Detailed report](camb-comparison/06_camb_upgrade_benchmark/Report.md)
+- [Data appendix](camb-comparison/06_camb_upgrade_benchmark/Data%20appendix.md)
+- [Plots for all 52 cosmologies shown in the report](camb-comparison/06_camb_upgrade_benchmark/Plot%20appendix.md)
+- [Figure index](camb-comparison/06_camb_upgrade_benchmark/Figure%20index.md)
 
-## Earlier work — the existing emulator comparison
+## Earlier results
 
+### 11 November · CBL’s emulator compared with CAMB2 and CLASS
 
-The completed solver study has now been extended to CBL's shipped
-emulator for the same three cosmologies and nine redshifts. The largest
-sampled emulator/CAMB2 differences in 0.02 < k < 0.3 Mpc^-1 are **0.68817%**
-for flat LambdaCDM, **0.42375%** for curved LambdaCDM and **0.68329%** for
-evolving dark energy. CAMB2/CLASS differences stay below 0.070% there.
+This study used the solver spectra from October as a reference for CBL’s
+emulator. Each of three cosmological models was tested at nine redshifts.
+Over the same range of wavenumbers used in the November benchmark, the largest
+differences between CBL’s emulator and CAMB2 were 0.68817% for flat ΛCDM,
+0.42375% for curved ΛCDM and 0.68329% for evolving dark energy. CAMB2 and
+CLASS agreed to within 0.070% across those cases.
 
-The comparison uses the existing CBL emulator. Its training assumptions
-differ from the current solver setup, and the original training settings
-are only partly known. The difference in the flat reference spectrum at z=0 remains an open
-question for subsequent emulator validation.
+CBL’s emulator first predicts a reference spectrum at $z=0$ and then rescales
+it to other redshifts. The checks on the network, growth calculation and
+rescaling all passed in the DIFA version of CBL. In the flat model, the
+differences from CAMB2 followed a similar pattern at all nine redshifts.
+Comparing the reference spectra at $z=0$ would help establish how much of
+that difference was already present before rescaling. Only part of the
+original training setup is known.
 
-- [Weekly update with two plots](meetings/2026-11-11.md)
-- [Detailed comparison report](camb-comparison/01_current_solver_comparison/results/Report.md)
-- [Data appendix](camb-comparison/01_current_solver_comparison/results/Data%20appendix.md)
-- [Figure index](camb-comparison/01_current_solver_comparison/results/figures/Figure%20index.md)
+[Weekly update with two plots](meetings/2026-11-11.md) · [Detailed report](camb-comparison/01_current_solver_comparison/results/Report.md) · [Data appendix](camb-comparison/01_current_solver_comparison/results/Data%20appendix.md) · [Figure index](camb-comparison/01_current_solver_comparison/results/figures/Figure%20index.md)
 
-### Earlier solver comparison
+### 29 October · Agreement between the solvers
 
-The earlier results compare CAMB 1.6.6, CAMB 2.0.4 and CLASS 3.1.0 for flat
-LambdaCDM, curved LambdaCDM and evolving dark energy. Each model was tested at
-nine redshifts from z=0 to z=2.
+The first study used CLASS 3.1.0 as an independent point of comparison for
+CAMB 1.6.6 and CAMB 2.0.4. For each of the three models, the comparison
+covered nine redshifts from $z=0$ to $z=2$. Within the range of wavenumbers
+given above, **CAMB 2.0.4 agreed more closely with CLASS in all 27 cases**.
+This held for both the largest difference at any sampled scale and the root
+mean square (RMS) difference, which summarises the differences across all
+sampled scales. The result measures agreement between these solvers under
+the settings used in the study.
 
-**CAMB2 had smaller maximum and RMS differences from CLASS in all 27 tested
-model–redshift combinations**, within 0.02 < k < 0.3 Mpc^-1. RMS measures the
-overall size of the sampled differences. This shows closer agreement with
-CLASS under the tested settings, rather than establishing absolute accuracy.
-
-- [Earlier weekly update — 29 October](meetings/2026-10-29.md): the solver-stage findings and remaining work at that date.
-- [Earlier solver report](https://github.com/M-A-Tbn/Thesis-Progress/blob/56e515fee4b34f244a41875708cf9e891690bfef/camb-comparison/01_current_solver_comparison/results/Report.md) with the setup, results and limitations.
-- [Input notes](camb-comparison/02_shared_inputs_and_z0_reference/Source%20audit.md): documented thesis settings and choices made for this comparison.
-
-The DIFA library, network and growth/rescaling checks pass. The current CBL
-implementation provides the reference emulator for subsequent training and
-validation. The source code and detailed setup records stay local.
+[Weekly update](meetings/2026-10-29.md) · [Solver report as published in October](https://github.com/M-A-Tbn/Thesis-Progress/blob/56e515fee4b34f244a41875708cf9e891690bfef/camb-comparison/01_current_solver_comparison/results/Report.md) · [Notes on the input settings](camb-comparison/02_shared_inputs_and_z0_reference/Source%20audit.md)
 
 ## Repository structure
 
-The tree shows the files included in this progress update.
+The `meetings/` folder contains the October and 11 November meeting notes.
+The `camb-comparison/` folder groups the scientific reports, appendices and
+plots by study. The calculation code, raw solver outputs and original SVG
+figures are kept in the local research workspace for a separate project
+repository planned for later.
 
 ```text
 thesis-progress/
@@ -193,25 +202,8 @@ thesis-progress/
     └── 2026-11-11.md
 ```
 
-The `meetings/` folder holds the weekly updates across the thesis. The
-`camb-comparison/` folder contains the reports and plots for the solver and
-emulator comparisons. The latest upgrade benchmark is in
-`06_camb_upgrade_benchmark/`. The earlier three-way comparison is in
-`01_current_solver_comparison/`, with its input notes in
-`02_shared_inputs_and_z0_reference/`. These folder numbers identify studies
-within the thesis.
-
-The first unchanged-emulator comparison extends the current report. Later
-training, validation and any neutrino-extension results will be added as the
-work is carried out; those stages have not produced results yet.
-
 ## Discussion and feedback
 
-Feedback and questions can be added in
-[Issues](https://github.com/M-A-Tbn/Thesis-Progress/issues) or discussed alongside
-the weekly updates.
-
-This repository will continue to track the whole thesis through written
-reports and PNG plots. Numerical data, calculation code, raw runs and SVG
-originals remain in the local research workspace. A separate repository for
-the complete code and calculation files is planned for later.
+The reports provide the basis for discussion at thesis meetings. Questions
+about a particular calculation or figure can also be recorded in
+[GitHub Issues](https://github.com/M-A-Tbn/Thesis-Progress/issues).
