@@ -14,6 +14,7 @@
 /camb-comparison/*
 !/camb-comparison/01_current_solver_comparison/
 !/camb-comparison/02_shared_inputs_and_z0_reference/
+!/camb-comparison/06_camb_upgrade_benchmark/
 
 /camb-comparison/01_current_solver_comparison/*
 !/camb-comparison/01_current_solver_comparison/Solver comparison guide.md
@@ -44,3 +45,17 @@ __pycache__/
 .env.*
 *.pem
 *.key
+
+# CAMB upgrade benchmark reports and presentation plots.
+/camb-comparison/06_camb_upgrade_benchmark/*
+!/camb-comparison/06_camb_upgrade_benchmark/Short report.md
+!/camb-comparison/06_camb_upgrade_benchmark/Report.md
+!/camb-comparison/06_camb_upgrade_benchmark/Data appendix.md
+!/camb-comparison/06_camb_upgrade_benchmark/Plot appendix.md
+!/camb-comparison/06_camb_upgrade_benchmark/Figure index.md
+!/camb-comparison/06_camb_upgrade_benchmark/figures/
+/camb-comparison/06_camb_upgrade_benchmark/figures/*
+!/camb-comparison/06_camb_upgrade_benchmark/figures/*.png
+!/camb-comparison/06_camb_upgrade_benchmark/figures/plot-appendix/
+/camb-comparison/06_camb_upgrade_benchmark/figures/plot-appendix/*
+!/camb-comparison/06_camb_upgrade_benchmark/figures/plot-appendix/*.png
